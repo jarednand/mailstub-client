@@ -1,0 +1,22 @@
+{
+  "name": "mailstub-client",
+  "version": "1.0.0",
+  "description": "A simple client for sending test emails to MailStub",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Jared Nand",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "typescript": "^5.9.3"
+  }
+}
