@@ -2,16 +2,38 @@
   "name": "mailstub-client",
   "version": "1.0.0",
   "description": "A simple client for sending test emails to MailStub",
+  "author": "Jared Nand",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "keywords": [
+    "email",
+    "testing",
+    "mailstub",
+    "mailstub-client",
+    "smtp",
+    "development",
+    "test-email",
+    "email-testing",
+    "mail",
+    "client"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jarednand/mailstub-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jarednand/mailstub-client/issues"
+  },
+  "homepage": "https://github.com/jarednand/mailstub-client",
   "scripts": {
     "build": "tsc"
   },
-  "author": "Jared Nand",
-  "license": "MIT",
   "dependencies": {
     "axios": "^1.12.2"
   },
