@@ -89,6 +89,3 @@ export const createClient = ({ port = 8000 }: { port?: number } = {}) => {
 
 // Export default client instance for convenience
 export const client = createClient();
-
-// Default export
-export default client;
