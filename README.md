@@ -11,14 +11,29 @@ npm install mailstub-client
 Or using your preferred package manager:
 
 ```bash
-# pnpm
 pnpm add mailstub-client
-
-# yarn
 yarn add mailstub-client
 ```
 
 ## Quick Start
+
+### Prerequisites
+
+1. Install and start the MailStub server:
+   ```bash
+   npm install -g mailstub
+   # or: pnpm add -g mailstub
+   # or: yarn global add mailstub
+   
+   mailstub start
+   ```
+
+2. Open `http://localhost:8000` and:
+   - Create a project
+   - Add a test user with an email address
+   - Copy your project ID (format: `p_xxxxx`)
+
+### Send Your First Email
 
 ```typescript
 import { client } from 'mailstub-client';
@@ -26,133 +41,84 @@ import { client } from 'mailstub-client';
 await client.send('p_your-project-id', {
   sender: 'noreply@myapp.com',
   receiver: 'user@example.com',
-  subject: 'Welcome to My App!',
+  subject: 'Welcome!',
   body: '<h1>Hello!</h1><p>Thanks for signing up.</p>'
 });
 ```
 
-## Prerequisites
-
-Before using the client, you need:
-
-1. **MailStub server running** - Install and start the [MailStub](https://www.npmjs.com/package/mailstub) server:
-   ```bash
-   npm install -g mailstub
-   mailstub start
-   ```
-
-2. **A project created** - Open `http://localhost:8000` and create a project
-
-3. **A test user added** - Add a user with an email address to your project
-
-4. **Your project ID** - Copy the project ID from the MailStub UI (format: `p_xxxxx`)
-
 ## API Reference
-
-### Default Client
-
-The default client connects to `http://localhost:8000`:
-
-```typescript
-import { client } from 'mailstub-client';
-
-await client.send(projectId, options);
-```
-
-### Custom Client
-
-Create a client with custom configuration:
-
-```typescript
-import { createClient } from 'mailstub-client';
-
-const client = createClient({ 
-  baseURL: 'http://localhost:3000' 
-});
-
-await client.send(projectId, options);
-```
 
 ### `client.send(projectId, options)`
 
-Send a test email to MailStub.
-
 **Parameters:**
 
-- `projectId` (string, required) - Your project ID (format: `p_xxxxx`)
-- `options` (object, required):
-  - `sender` (string, required) - Full sender email address
-  - `receiver` (string, required) - Recipient email (must be a user in your project)
-  - `subject` (string, required) - Email subject line
-  - `body` (string, required) - Email body (HTML supported)
+- `projectId` (string) - Your project ID (format: `p_xxxxx`)
+- `options` (object):
+  - `sender` (string) - Sender email address
+  - `receiver` (string) - Recipient email (must be a user in your project)
+  - `subject` (string) - Email subject line
+  - `body` (string) - Email body (HTML supported)
 
-**Returns:** `Promise<{ message: Message }>` - The created message object
-
-**Throws:** Error if validation fails or the request fails
+**Returns:** Promise with the created message object
 
 **Example:**
 
 ```typescript
-try {
-  const result = await client.send('p_abc123', {
-    sender: 'support@myapp.com',
-    receiver: 'testuser@example.com',
-    subject: 'Password Reset',
-    body: '<p>Click here to reset your password...</p>'
-  });
-  
-  console.log('Email sent:', result.message.id);
-} catch (error) {
-  console.error('Failed to send email:', error.message);
-}
+const result = await client.send('p_abc123', {
+  sender: 'support@myapp.com',
+  receiver: 'testuser@example.com',
+  subject: 'Password Reset',
+  body: '<p>Click here to reset your password...</p>'
+});
+
+console.log('Message ID:', result.message.id);
+```
+
+### Custom Port
+
+If your MailStub server runs on a different port:
+
+```typescript
+import { createClient } from 'mailstub-client';
+
+const client = createClient({ port: 3000 });
 ```
 
 ## Usage Examples
 
-### Welcome Email
+### Development vs Production
+
+Create an abstraction to switch between MailStub (dev) and real email services (production):
 
 ```typescript
-await client.send('p_abc123', {
-  sender: 'welcome@myapp.com',
-  receiver: 'newuser@example.com',
-  subject: 'Welcome aboard!',
-  body: `
-    <h1>Welcome to MyApp!</h1>
-    <p>We're excited to have you here.</p>
-  `
+import { client as mailstubClient } from 'mailstub-client';
+import sendgrid from '@sendgrid/mail';
+
+sendgrid.setApiKey(process.env.SENDGRID_API_KEY || '');
+
+export async function sendEmail({ to, from, subject, html }) {
+  if (process.env.NODE_ENV === 'production') {
+    await sendgrid.send({ to, from, subject, html });
+  } else {
+    await mailstubClient.send(process.env.MAILSTUB_PROJECT_ID!, {
+      sender: from,
+      receiver: to,
+      subject,
+      body: html
+    });
+  }
+}
+
+// Usage anywhere in your app:
+await sendEmail({
+  to: 'user@example.com',
+  from: 'noreply@myapp.com',
+  subject: 'Welcome!',
+  html: '<h1>Welcome!</h1>'
 });
 ```
 
-### Password Reset
-
-```typescript
-await client.send('p_abc123', {
-  sender: 'security@myapp.com',
-  receiver: 'user@example.com',
-  subject: 'Reset your password',
-  body: `
-    <p>Click the link below to reset your password:</p>
-    <a href="https://myapp.com/reset/token123">Reset Password</a>
-  `
-});
-```
-
-### Order Confirmation
-
-```typescript
-await client.send('p_abc123', {
-  sender: 'orders@myapp.com',
-  receiver: 'customer@example.com',
-  subject: 'Order #12345 Confirmed',
-  body: `
-    <h2>Thank you for your order!</h2>
-    <p>Order #12345 has been confirmed.</p>
-    <p>Total: $99.99</p>
-  `
-});
-```
-
-### Testing Framework Integration
+### Testing Integration
 
 ```typescript
 import { client } from 'mailstub-client';
@@ -172,128 +138,32 @@ describe('Email notifications', () => {
 });
 ```
 
-## Configuration
-
-### Custom Server URL
-
-If your MailStub server is running on a different port or host:
-
-```typescript
-import { createClient } from 'mailstub-client';
-
-const client = createClient({ 
-  baseURL: 'http://localhost:3000' 
-});
-```
-
-### Environment Variables
-
-You can configure the base URL via environment variables:
-
-```typescript
-const client = createClient({ 
-  baseURL: process.env.MAILSTUB_URL || 'http://localhost:8000'
-});
-```
-
-## TypeScript Support
-
-This package includes full TypeScript definitions. Import types as needed:
-
-```typescript
-import { client, type SendEmailOptions, type Message } from 'mailstub-client';
-
-const options: SendEmailOptions = {
-  sender: 'test@myapp.com',
-  receiver: 'user@example.com',
-  subject: 'Test',
-  body: '<p>Test email</p>'
-};
-
-const result = await client.send('p_abc123', options);
-const message: Message = result.message;
-```
-
-## Error Handling
-
-The client throws errors for:
-
-- Invalid project ID format
-- Missing required fields
-- Network errors
-- Server errors
-
-Always wrap calls in try-catch:
-
-```typescript
-try {
-  await client.send('p_abc123', emailOptions);
-} catch (error) {
-  if (error.message.includes('Network')) {
-    console.error('Cannot reach MailStub server');
-  } else {
-    console.error('Failed to send email:', error.message);
-  }
-}
-```
-
-## Best Practices
-
-### ✅ Do
-
-- Use MailStub for development and testing environments
-- Create separate projects for different apps or environments
-- Add multiple test users to cover different scenarios
-- Use descriptive sender addresses
-- Include HTML formatting in email bodies
-
-### ❌ Don't
-
-- Use MailStub in production
-- Store sensitive or real user data
-- Use for compliance-regulated communications
-- Rely on MailStub for delivery guarantees
-
 ## Troubleshooting
 
-### "Cannot connect to MailStub server"
+**"Cannot connect to MailStub server"**  
+Make sure the server is running: `mailstub start`
 
-Make sure the MailStub server is running:
+**"Failed to send email"**  
+Check that:
+- Project ID starts with `p_`
+- Receiver exists as a user in your project
+- Server is running on the correct port
 
+**Custom port not working**  
+Create a client with the custom port and ensure the server started with the same port:
 ```bash
-mailstub start
+mailstub start --port 3000
 ```
-
-### "Invalid project ID"
-
-Project IDs must start with `p_`. Check your project ID in the MailStub UI.
-
-### "User not found"
-
-The receiver email must match a user in your project. Add the user in the MailStub UI first.
-
-### Custom port not working
-
-If your server uses a custom port, create a custom client:
-
 ```typescript
-const client = createClient({ baseURL: 'http://localhost:3000' });
+const client = createClient({ port: 3000 });
 ```
-
-## Related
-
-- [MailStub](https://www.npmjs.com/package/mailstub) - The main MailStub server
-- [GitHub Repository](https://github.com/jarednand/mailstub)
 
 ## License
 
 MIT
 
-## Support
+## Links
 
-- 🐛 [Report Issues](https://github.com/jarednand/mailstub/issues)
-- 📖 [Documentation](https://github.com/jarednand/mailstub)
-
----
-
-Part of the [MailStub](https://github.com/jarednand/mailstub) ecosystem.
+- [MailStub Server](https://www.npmjs.com/package/mailstub)
+- [GitHub](https://github.com/jarednand/mailstub)
+- [Issues](https://github.com/jarednand/mailstub/issues)
