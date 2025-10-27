@@ -38,7 +38,7 @@ export interface SendEmailResponse {
  * const client = createClient({ port: 5000 });
  * 
  * await client.send('p_550e8400-e29b-41d4-a716-446655440000', {
- *   sender: 'noreply@myapp.local',
+ *   sender: 'noreply@myapp.com',
  *   receiver: 'user@example.com',
  *   subject: 'Welcome!',
  *   body: '<h1>Hello World</h1>'
