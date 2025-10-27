@@ -164,6 +164,6 @@ MIT
 
 ## Links
 
-- [MailStub Server](https://www.npmjs.com/package/mailstub)
-- [GitHub](https://github.com/jarednand/mailstub)
-- [Issues](https://github.com/jarednand/mailstub/issues)
+- [GitHub](https://github.com/jarednand/mailstub-client)
+- [Issues](https://github.com/jarednand/mailstub-client/issues)
+- [MailStub](https://www.npmjs.com/package/mailstub)
