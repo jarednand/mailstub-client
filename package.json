@@ -1,7 +1,7 @@
 {
   "name": "mailstub-client",
   "version": "0.1.0",
-  "description": "A simple client for sending test emails to MailStub",
+  "description": "Official client for sending test emails to MailStub",
   "author": "Jared Nand",
   "license": "MIT",
   "main": "dist/index.js",

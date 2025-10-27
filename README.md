@@ -1,6 +1,6 @@
 # mailstub-client
 
-Official client for [MailStub](https://github.com/jarednand/mailstub) - a lightweight email testing tool for developers.
+Official client for sending test emails to [MailStub](https://github.com/jarednand/mailstub).
 
 ## Installation
 
